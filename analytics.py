@@ -22,7 +22,7 @@ STREETJSON = "street_data.json"
 STREET_CRASH_RELATIONSHIP = 'street_to_crash.csv'
 STREETCSV = 'street_data.csv'
 
-def db_setup():
+def db_setup() -> psycopg2.extensions.cursor:
     ''' connect to postgres database '''
     try:
         connection = psycopg2.connect(user = USERNAME,
@@ -36,7 +36,8 @@ def db_setup():
         return None
 
 
-def all_streets_from_inter(intnum):
+def all_streets_from_inter(intnum: int) -> str:
+    ''' return query string to get all streets connected to a given intersection '''
     query ="""
 SELECT
     streetcenterlines.id
@@ -47,7 +48,8 @@ WHERE intersections.intnum = {}
 """
     return query.format(intnum)
 
-def get_street_from_inter(intnum, direction):
+def get_street_from_inter(intnum: int, direction: str) -> str:
+    ''' return query string to get a single street given intersection and direction '''
     query ="""
 SELECT
     getstreetfrominterv2(intersections.id, '{}')
@@ -56,8 +58,8 @@ WHERE intersections.intnum = {};
 """
     return query.format(direction,intnum)
 
-def get_street_length(cursor, street_id):
-    ''' feet '''
+def get_street_length(cursor: psycopg2.extensions.cursor, street_id: int) -> str:
+    ''' street length in feet '''
     query ="""
 SELECT
     ST_Length(ST_AsText(ST_LineMerge(geom)))
@@ -71,7 +73,8 @@ WHERE id = {};
     else:
         return None
 
-def read_crash_csv():
+def read_crash_csv() -> dict:
+    '''Reads initial crash data csv into a dictionary, parsing out all the relevant information for each crash'''
     crash_data = dict()
 
     with open(CSVNAME) as csv_file:
@@ -119,18 +122,22 @@ def read_crash_csv():
 
     return crash_data
 
-def calc_KSI(fatal, major):
+def calc_KSI(fatal: int, major: int) -> int:
+    ''' KSI calculator '''
     return fatal + major
 
 def calc_total_injured(fatal, major, moderate, minor):
+    ''' total injury calculator '''
     return fatal + major + moderate + minor
 
-def clean_severity(n):
+def clean_severity(n: str) -> int:
+    ''' total severity calculator '''
     if not n:
         return 0
     return int(n)
 
-def clean_date(date_str):
+def clean_date(date_str: str) -> datetime.datetime:
+    ''' cleans date string into proper datetime '''
     if not date_str:
         return None
     try:
@@ -138,7 +145,8 @@ def clean_date(date_str):
     except:
         return datetime.datetime.strptime(date_str, '%Y-%m-%d')
 
-def street_list_from_crash(crash_data, crash, cursor):
+def street_list_from_crash(crash_data: dict, crash: int, cursor: psycopg2.extensions.cursor) -> list:
+    ''' returns a list of all streets affected by a given crash '''
     street_list = list()
     int_num = crash_data[crash]['intersection_id']
     direction = crash_data[crash]['direction']
@@ -157,7 +165,8 @@ def street_list_from_crash(crash_data, crash, cursor):
             street_list.append(int(street[0]))
     return street_list
 
-def feet_to_mile(feet):
+def feet_to_mile(feet: float) -> float:
+    ''' convert feet to miles '''
     return feet / 5280.0
 
 if __name__ == '__main__':
@@ -168,10 +177,14 @@ if __name__ == '__main__':
     i = 0
     total_crashes = len(crash_data)
     for crash in crash_data:
+        # prints progress to terminal
         i += 1
         if not i % 500:
             print('progress {:.2f}%'.format(100.0*i/total_crashes))
+
+        # discovers all streets affected by a crash
         streets = street_list_from_crash(crash_data,crash,cursor)
+        # for each street affected by a given crash, create or modify that street's dictionary entry in street_crashes to contain information on that crash
         for street in streets:
 
             if street not in street_crashes:
@@ -190,6 +203,7 @@ if __name__ == '__main__':
             street_crashes[street]['injured'] += crash_data[crash]['injured']
             street_crashes[street]['ksi'] += crash_data[crash]['ksi']
 
+    # calculate ksi/mile, injured/mile, etc. for each street in the street_crashes dictionary
     for street in street_crashes:
         if street_crashes[street]['length'] is not None:
             length = street_crashes[street]['length']
@@ -205,8 +219,7 @@ if __name__ == '__main__':
             street_crashes[street]['injured/mile'] = None
             street_crashes[street]['crashes/mile'] = None
 
-
-
+    # Creates CSV and JSON representations of street_crashes
     with open(STREETJSON, 'w') as f:
         f.write(json.dumps(street_crashes, default=str, indent=4))
 

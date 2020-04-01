@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''analytics.py'''
+'''analytics.py: creates multiple files to represent none data about crashes on each street segment'''
 __author__ = "Jack Fox"
 __email__ = "jfox13@nd.edu"
 

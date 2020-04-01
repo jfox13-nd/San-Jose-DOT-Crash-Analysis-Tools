@@ -14,6 +14,7 @@ import functools
 USERNAME = "jfox13"
 DBLOCALNAME = "dot"
 ROADSJSON = 'roads.json'
+ROADSCSV = 'roads.csv'
 STREETDATA = 'street_data.json'
 FEETPERMILE = 5280.0
 
@@ -291,7 +292,7 @@ if __name__ == '__main__':
 
     with open(STREETDATA, 'r') as f:
         street_data = json.load(f)
-    '''
+
     # calculate ksi, injury, crash statistics for each road
     for road in roads:
         roads[road]['ksi'], roads[road]['injured'], roads[road]['crashes'] = analyze_segment(roads[road]['segments'], street_data, map_dict)
@@ -303,9 +304,19 @@ if __name__ == '__main__':
     # write roads dictionary to JSON file
     with open(ROADSJSON, 'w') as f:
         f.write(json.dumps(roads, default=str, indent=4))
-    '''
 
-    for road in roads:
-        linestring = create_road_geometry(cursor, list(roads[road]['segments']))
-        print(linestring)
-        break
+    # write roads to csv
+    with open(ROADSCSV, 'w') as f:
+        writer = csv.writer(f,delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(['roadid','geom','ksi','injured','crashes','ksi/mile','injured/mile','crashes/mile'])
+        for road in roads:
+            writer.writerow(
+                [road, 
+                create_road_geometry(cursor, list(roads[road]['segments'])), 
+                roads[road]['ksi'], 
+                roads[road]['injured'],
+                roads[road]['crashes'],
+                roads[road]['ksi/mile'],
+                roads[road]['injured/mile'],
+                roads[road]['crashes/mile']
+                ])

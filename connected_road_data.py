@@ -15,8 +15,9 @@ USERNAME = "jfox13"
 DBLOCALNAME = "dot"
 ROADSJSON = 'roads.json'
 STREETDATA = 'street_data.json'
+FEETPERMILE = 5280.0
 
-def db_setup():
+def db_setup() -> psycopg2.extensions.cursor:
     ''' connect to postgres database '''
     try:
         connection = psycopg2.connect(user = USERNAME,
@@ -29,7 +30,8 @@ def db_setup():
         print("Error: Could not connect to SQL database {} as {}".format(DBLOCALNAME,USERNAME),file=sys.stderr)
         return None
 
-def get_ids(cursor, id_dict):
+def get_ids(cursor: psycopg2.extensions.cursor, id_dict: dict) -> None:
+    ''' creates a dictionary with a intid key for every street segment '''
     ids = set()
     query ="""
 SELECT
@@ -40,19 +42,36 @@ FROM streetcenterlines;
     for i in cursor.fetchall():
         id_dict[int(i[0])] = set()
 
-def analyze_segment(segments, street_data):
+def map_ids_intid(cursor: psycopg2.extensions.cursor, map_dict: dict) -> None:
+    ''' creates a dictionary that maps intid to id for street segments '''
+    query ="""
+SELECT
+    id,
+    intid
+FROM streetcenterlines;
+"""
+    cursor.execute(query)
+    for i in cursor.fetchall():
+        map_dict[int(i[1])] = int(i[0])
+
+def analyze_segment(segments: list, street_data: dict, map_dict: dict) -> tuple:
+    ''' return the combined ksi, injured, and total crashes for a list of street segments '''
+    # create a crash_dict that holds all unique crashes (with relevant information) for the street segemnts
     crash_dict = {}
+
     for segment in segments:
-        segment = str(segment)
+        # convert intid to str(id) to be compatible with street data dict
+        segment = str(map_dict[segment])
         if segment in street_data and 'crashes' in street_data[segment]:
             for crash in street_data[segment]['crashes']:
                 crash_dict[crash] = dict()
                 crash_dict[crash]['ksi'] = street_data[segment]['crashes'][crash]['ksi']
                 crash_dict[crash]['injured'] = street_data[segment]['crashes'][crash]['injured']
+
+    # calculate statistics from crash_dict
     ksi = 0
-    #functools.reduce(lambda x,y:crash_dict[x]['ksi']+crash_dict[y]['ksi'],crash_dict.keys())
     injured = 0
-    #functools.reduce(lambda x,y:crash_dict[x]['injured']+crash_dict[y]['injured'],crash_dict.keys())
+
     for crash in crash_dict:
         if 'injured' in crash_dict[crash]:
             injured += crash_dict[crash]['injured']
@@ -61,7 +80,8 @@ def analyze_segment(segments, street_data):
     crashes = len(crash_dict)
     return ksi, injured, crashes
 
-def get_connections(cursor):
+def get_connections(cursor: psycopg2.extensions.cursor) -> list:
+    ''' get a list of all connected street segments where each element contains information on a pair of connected segments '''
     query ="""
 SELECT
     STREETS.name,
@@ -93,13 +113,107 @@ WHERE
     cursor.execute(query)
     return cursor.fetchall()
 
+def get_nonconnections(cursor: psycopg2.extensions.cursor) -> list:
+    ''' get a list of all connected street segments where each element contains information on a pair of connected segments '''
+    query ="""
+SELECT
+    streetcenterlines.intid,
+    streetcenterlines.frominteri,
+    streetcenterlines.tointerid,
+    streetcenterlines.fullname
+FROM streetcenterlines
+WHERE streetcenterlines.intid NOT IN
+    (SELECT
+        STREETS.intid
+    FROM
+        (SELECT
+            streetcenterlines.id,
+            streetcenterlines.intid,
+            streetcenterlines.frominteri as a,
+            streetcenterlines.tointerid as b,
+            streetcenterlines.fullname AS name
+        FROM streetcenterlines
+        ) AS STREETS,
+        streetcenterlines
+    WHERE
+        (streetcenterlines.frominteri = STREETS.a
+        OR streetcenterlines.tointerid = STREETS.a
+        OR streetcenterlines.frominteri = STREETS.b
+        OR streetcenterlines.tointerid = STREETS.b
+        )
+        AND STREETS.name = streetcenterlines.fullname
+        AND STREETS.id != streetcenterlines.id
+    );
+"""
+    cursor.execute(query)
+    return cursor.fetchall()
+
+def get_intersection_map() -> dict:
+    ''' get all intersections associated with street segments '''
+    intersection_map = dict()
+    query ="""
+SELECT
+    intid,
+    frominteri,
+    tointerid
+FROM streetcenterlines;
+"""
+    cursor.execute(query)
+    for i in cursor.fetchall():
+        intersection_map[int(i[0])] = (int(i[1]), int(i[2]))
+
+    return intersection_map
+
+def create_road(intida: int, intidb: int, name: dict) -> set:
+    ''' creates a set of connected street segments '''
+    new_road = set((intida, intidb))
+    road_expanded = True
+    while road_expanded:
+        road_expanded = False
+        for a, b in name:
+            if a in new_road and b not in new_road:
+                road_expanded = True
+                new_road.add(b)
+            elif b in new_road and a not in new_road:
+                road_expanded = True
+                new_road.add(a)
+    return new_road
+
+def road_length(segments: set) -> float:
+    ''' returns length of entire road in miles '''
+    total_length = 0.0
+    if not segments:
+        return total_length
+    segs = list(segments)
+
+    query ="""
+SELECT
+    ST_Length(ST_AsText(ST_LineMerge(geom)))
+FROM streetcenterlines
+WHERE intid = {}
+""".format(segs[0])
+    segs = segs[1:]
+    for seg in segs:
+        query = '{}\n\t OR intid = {}'.format(query,seg)
+    query = '{};'.format(query)
+    cursor.execute(query)
+    
+    for i in cursor.fetchall():
+        total_length += float(i[0])
+
+    return total_length / FEETPERMILE
+
 if __name__ == '__main__':
     cursor = db_setup()
-    id_dict = dict()
+    #id_dict = dict()
     roads = dict()
-    get_ids(cursor, id_dict)
+    names = dict()
+    intersection_map = get_intersection_map()
+    #get_ids(cursor, id_dict)
+
+
     connections = get_connections(cursor)
-    road_id = 1
+
     for name, ida, intida, idb, intidb, intersectiona, intersectionb in connections:
         ida = int(ida)
         idb = int(idb)
@@ -108,47 +222,59 @@ if __name__ == '__main__':
         intersectiona = int(intersectiona)
         intersectionb = int(intersectionb)
 
-        #if not intida in roads:
-        #    id_dict[intida] = set()
-        #if not intidb in roads:
-        #    id_dict[intidb] = set()
-        id_dict[intida].add(intidb)
-        id_dict[intidb].add(intida)
-        found = False
-        for i in roads:
-            found = False
-            if intida in roads[i]['segments']:
-                roads[i]['segments'].add(intidb)
-                roads[i]['intersections'].add(intersectiona)
-                roads[i]['intersections'].add(intersectionb)
-                found = True
-                break
-            if intidb in roads[i]['segments']:
-                roads[i]['segments'].add(intida)
-                roads[i]['intersections'].add(intersectiona)
-                roads[i]['intersections'].add(intersectionb)
-                found = True
-                break
-        if not found:
+        if not name in names:
+            names[name] = dict()
+        names[name][(intida,intidb)] = (intersectiona, intersectionb)
+        names[name][(intidb,intida)] = (intersectiona, intersectionb)
+
+    for name in names:
+        name = names[name]
+        connected_segments = list()
+        for intida, intidb in name:
+            if len(connected_segments) == 0:
+                connected_segments.append( create_road(intida,intidb,name) )
+            else:
+                present = False
+                for connected_segment in connected_segments:
+                    if intida in connected_segment or intidb in connected_segment:
+                        present = True
+                        break
+                if not present:
+                    connected_segments.append( create_road(intida,intidb,name) )
+        name['roads'] = connected_segments
+    
+    road_id = 1
+    for name in names:
+        streets = names[name]['roads']
+        for street in streets:
             roads[road_id] = dict()
-            roads[road_id]['segments'] = set()
-            roads[road_id]['intersections'] = set()
             roads[road_id]['name'] = name
-            roads[road_id]['segments'].add(intida)
-            roads[road_id]['segments'].add(intidb)
-            roads[road_id]['intersections'].add(intersectiona)
-            roads[road_id]['intersections'].add(intersectionb)
+            roads[road_id]['segments'] = street
+            roads[road_id]['intersections']  = set(map(lambda x: intersection_map[x][0], street))
+            roads[road_id]['intersections'] |= set(map(lambda x: intersection_map[x][1], street))
             road_id += 1
 
+    for street in get_nonconnections(cursor):
+        roads[road_id] = dict()
+        roads[road_id]['name'] = street[3]
+        roads[road_id]['segments'] = set( [int(street[0])] )
+        roads[road_id]['intersections'] = set([int(street[1]), int(street[2])])
+        road_id += 1
+
     street_data = {}
+    map_dict = {}
+    map_ids_intid(cursor, map_dict)
+
     with open(STREETDATA, 'r') as f:
         street_data = json.load(f)
 
     for road in roads:
-        print(road)
-        print(analyze_segment(roads[road]['segments'], street_data))
-        break
+        roads[road]['ksi'], roads[road]['injured'], roads[road]['crashes'] = analyze_segment(roads[road]['segments'], street_data, map_dict)
+        length = road_length(roads[road]['segments'])
+        roads[road]['ksi/mile'] = roads[road]['ksi'] / length
+        roads[road]['injured/mile'] = roads[road]['injured'] / length
+        roads[road]['crashes/mile'] = roads[road]['crashes'] / length
 
 
-    #with open(ROADSJSON, 'w') as f:
-    #    f.write(json.dumps(roads, default=str, indent=4))
+    with open(ROADSJSON, 'w') as f:
+        f.write(json.dumps(roads, default=str, indent=4))

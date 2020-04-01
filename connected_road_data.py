@@ -207,11 +207,13 @@ if __name__ == '__main__':
     cursor = db_setup()
     roads = dict()
     names = dict()
+
+    # dictionary mapping of each intid to its two intersections
     intersection_map = get_intersection_map(cursor)
-
-
+    # get list of all connected segments
     connections = get_connections(cursor)
 
+    # parse connections list, create name dictionary that maps each street names to all street segment connections with that street name
     for name, ida, intida, idb, intidb, intersectiona, intersectionb in connections:
         ida = int(ida)
         idb = int(idb)
@@ -225,6 +227,7 @@ if __name__ == '__main__':
         names[name][(intida,intidb)] = (intersectiona, intersectionb)
         names[name][(intidb,intida)] = (intersectiona, intersectionb)
 
+    # finds all roads (sets of connected street segments of the same name) with a given street name, adds this list of sets to the names dictionary
     for name in names:
         name = names[name]
         connected_segments = list()
@@ -241,6 +244,7 @@ if __name__ == '__main__':
                     connected_segments.append( create_road(intida,intidb,name) )
         name['roads'] = connected_segments
     
+    # adds each road to the roads dictionary
     road_id = 1
     for name in names:
         streets = names[name]['roads']
@@ -252,6 +256,7 @@ if __name__ == '__main__':
             roads[road_id]['intersections'] |= set(map(lambda x: intersection_map[x][1], street))
             road_id += 1
 
+    # adds all street segments to the roads dictionary as single-segment roads that were not previously 
     for street in get_nonconnections(cursor):
         roads[road_id] = dict()
         roads[road_id]['name'] = street[3]
@@ -266,6 +271,7 @@ if __name__ == '__main__':
     with open(STREETDATA, 'r') as f:
         street_data = json.load(f)
 
+    # calculate ksi, injury, crash statistics for each road
     for road in roads:
         roads[road]['ksi'], roads[road]['injured'], roads[road]['crashes'] = analyze_segment(roads[road]['segments'], street_data, map_dict)
         length = road_length(roads[road]['segments'])
@@ -273,6 +279,6 @@ if __name__ == '__main__':
         roads[road]['injured/mile'] = roads[road]['injured'] / length
         roads[road]['crashes/mile'] = roads[road]['crashes'] / length
 
-
+    # write roads dictionary to JSON file
     with open(ROADSJSON, 'w') as f:
         f.write(json.dumps(roads, default=str, indent=4))

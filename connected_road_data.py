@@ -148,6 +148,27 @@ WHERE streetcenterlines.intid NOT IN
     cursor.execute(query)
     return cursor.fetchall()
 
+def create_road_geometry(cursor: psycopg2.extensions.cursor, road: list) -> str:
+    ''' create a linestring for a road '''
+    query ="""
+SELECT
+    ST_AsText(ST_LineMerge(ST_Union(geom)))
+FROM streetcenterlines
+WHERE 
+"""
+    end_query = """
+GROUP BY fullname;
+"""
+    if road:
+        query = "{}\n\tintid = {}".format(query,road[0])
+    for segment in road[1:]:
+        query = "{}\n\tOR intid = {}".format(query,segment)
+    query = "{}\n{}".format(query,end_query)
+    
+    cursor.execute(query)
+    return cursor.fetchall()[0][0]
+    
+
 def get_intersection_map(cursor: psycopg2.extensions.cursor) -> dict:
     ''' get all intersections associated with street segments '''
     intersection_map = dict()
@@ -270,11 +291,11 @@ if __name__ == '__main__':
 
     with open(STREETDATA, 'r') as f:
         street_data = json.load(f)
-
+    '''
     # calculate ksi, injury, crash statistics for each road
     for road in roads:
         roads[road]['ksi'], roads[road]['injured'], roads[road]['crashes'] = analyze_segment(roads[road]['segments'], street_data, map_dict)
-        length = road_length(roads[road]['segments'])
+        length = road_length(cursor, roads[road]['segments'])
         roads[road]['ksi/mile'] = roads[road]['ksi'] / length
         roads[road]['injured/mile'] = roads[road]['injured'] / length
         roads[road]['crashes/mile'] = roads[road]['crashes'] / length
@@ -282,3 +303,9 @@ if __name__ == '__main__':
     # write roads dictionary to JSON file
     with open(ROADSJSON, 'w') as f:
         f.write(json.dumps(roads, default=str, indent=4))
+    '''
+
+    for road in roads:
+        linestring = create_road_geometry(cursor, list(roads[road]['segments']))
+        print(linestring)
+        break

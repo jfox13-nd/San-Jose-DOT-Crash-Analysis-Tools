@@ -148,7 +148,7 @@ WHERE streetcenterlines.intid NOT IN
     cursor.execute(query)
     return cursor.fetchall()
 
-def get_intersection_map() -> dict:
+def get_intersection_map(cursor: psycopg2.extensions.cursor) -> dict:
     ''' get all intersections associated with street segments '''
     intersection_map = dict()
     query ="""
@@ -179,7 +179,7 @@ def create_road(intida: int, intidb: int, name: dict) -> set:
                 new_road.add(a)
     return new_road
 
-def road_length(segments: set) -> float:
+def road_length(cursor: psycopg2.extensions.cursor, segments: set) -> float:
     ''' returns length of entire road in miles '''
     total_length = 0.0
     if not segments:
@@ -205,11 +205,9 @@ WHERE intid = {}
 
 if __name__ == '__main__':
     cursor = db_setup()
-    #id_dict = dict()
     roads = dict()
     names = dict()
-    intersection_map = get_intersection_map()
-    #get_ids(cursor, id_dict)
+    intersection_map = get_intersection_map(cursor)
 
 
     connections = get_connections(cursor)

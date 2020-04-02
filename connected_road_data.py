@@ -308,11 +308,12 @@ if __name__ == '__main__':
     # write roads to csv
     with open(ROADSCSV, 'w') as f:
         writer = csv.writer(f,delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['roadid','geom','ksi','injured','crashes','ksi/mile','injured/mile','crashes/mile'])
+        writer.writerow(['roadid','geom','name','ksi','injured','crashes','ksi/mile','injured/mile','crashes/mile'])
         for road in roads:
             writer.writerow(
                 [road, 
-                create_road_geometry(cursor, list(roads[road]['segments'])), 
+                create_road_geometry(cursor, list(roads[road]['segments'])),
+                roads[road]['name'],
                 roads[road]['ksi'], 
                 roads[road]['injured'],
                 roads[road]['crashes'],

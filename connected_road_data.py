@@ -153,7 +153,7 @@ def create_road_geometry(cursor: psycopg2.extensions.cursor, road: list) -> str:
     ''' create a linestring for a road '''
     query ="""
 SELECT
-    ST_AsText(ST_LineMerge(ST_Union(geom)))
+    (ST_Dump(ST_AsText(ST_LineMerge(ST_Union(geom))))).geom
 FROM streetcenterlines
 WHERE 
 """

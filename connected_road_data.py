@@ -193,12 +193,13 @@ def get_intersection_map(cursor: psycopg2.extensions.cursor) -> dict:
 SELECT
     intid,
     frominteri,
-    tointerid
+    tointerid,
+    streetclas
 FROM streetcenterlines;
 """
     cursor.execute(query)
     for i in cursor.fetchall():
-        intersection_map[int(i[0])] = (int(i[1]), int(i[2]))
+        intersection_map[int(i[0])] = (int(i[1]), int(i[2]), i[3])
 
     return intersection_map
 
@@ -349,21 +350,29 @@ if __name__ == '__main__':
         roads[road]['ksi/mile'] = roads[road]['ksi'] / length
         roads[road]['injured/mile'] = roads[road]['injured'] / length
         roads[road]['crashes/mile'] = roads[road]['crashes'] / length
+        roads[road]['street_classification'] = set()
+        for segment in roads[road]['segments']:
+            roads[road]['street_classification'].add(intersection_map[segment][2])
 
     # write roads dictionary to JSON file
     with open(ROADSJSON, 'w') as f:
         f.write(json.dumps(roads, default=str, indent=4))
-    #  roadid 309
 
     # write roads to csv
     with open(ROADSCSV, 'w') as f:
         writer = csv.writer(f,delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['roadid','geom','name','ksi','injured','crashes','ksi/mile','injured/mile','crashes/mile'])
+        writer.writerow(['roadid','geom','name', 'street_classification', 'ksi','injured','crashes','ksi/mile','injured/mile','crashes/mile'])
         for road in roads:
+            classes = list(roads[road]['street_classification'])
+            if len(classes) != 1:
+                road_class = 'Mixed'
+            else:
+                road_class = classes[0]
             writer.writerow(
                 [road, 
                 create_road_geometry(cursor, list(roads[road]['segments']), roads[road]['name']),
                 roads[road]['name'],
+                road_class,
                 roads[road]['ksi'], 
                 roads[road]['injured'],
                 roads[road]['crashes'],

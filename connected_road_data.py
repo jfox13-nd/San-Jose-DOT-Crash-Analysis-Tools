@@ -360,9 +360,6 @@ if __name__ == '__main__':
         writer = csv.writer(f,delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['roadid','geom','name','ksi','injured','crashes','ksi/mile','injured/mile','crashes/mile'])
         for road in roads:
-            if roads[road]['name'] == 'N 10th St':
-                print("found")
-                print(road)
             writer.writerow(
                 [road, 
                 create_road_geometry(cursor, list(roads[road]['segments']), roads[road]['name']),

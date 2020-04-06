@@ -18,7 +18,7 @@ ROADSCSV = 'roads.csv'
 STREETDATA = 'street_data.json'
 FEETPERMILE = 5280.0
 
-def db_setup() -> psycopg2.extensions.cursor:
+def db_setup() -> tuple:
     ''' connect to postgres database '''
     try:
         connection = psycopg2.connect(user = USERNAME,
@@ -26,7 +26,7 @@ def db_setup() -> psycopg2.extensions.cursor:
                                     port = "5432",
                                     database = DBLOCALNAME)
         cursor = connection.cursor()
-        return cursor
+        return cursor, connection
     except:
         print("Error: Could not connect to SQL database {} as {}".format(DBLOCALNAME,USERNAME),file=sys.stderr)
         return None
@@ -149,7 +149,7 @@ WHERE streetcenterlines.intid NOT IN
     cursor.execute(query)
     return cursor.fetchall()
 
-def create_road_geometry(cursor: psycopg2.extensions.cursor, road: list) -> str:
+def create_road_geometry(cursor: psycopg2.extensions.cursor, road: list, name) -> str:
     ''' create a linestring for a road '''
     query ="""
 SELECT
@@ -165,10 +165,54 @@ GROUP BY fullname;
     for segment in road[1:]:
         query = "{}\n\tOR intid = {}".format(query,segment)
     query = "{}\n{}".format(query,end_query)
+
+    query ="""
+SELECT
+    ST_LineMerge(geom) -- ST_Multi(ST_LineMerge(geom))
+FROM streetcenterlines
+WHERE
+"""
+    if road:
+        query = "{}\n\tintid = {}".format(query,road[0])
+    for segment in road[1:]:
+        query = "{}\n\tOR intid = {}".format(query,segment)
+    query = '{};'.format(query)
+
+    if name == 'Sands Dr':
+        print(query)
     
     cursor.execute(query)
-    return cursor.fetchall()[0][0]
-    
+    geometries = [ i[0] for i in cursor.fetchall() ]
+
+    if name == 'New Street' and 78618 in road:
+        print(len(geometries))
+        print()
+    while len(geometries) > 1:
+
+        query = """
+SELECT (ST_Dump(ST_AsText(ST_LineMerge(ST_Collect( '{}', '{}' ))))).geom ;
+""".format(geometries[0],geometries[1])
+        query = """
+SELECT ST_LineMerge( ST_Union( ST_LineMerge('{}'), ST_LineMerge('{}') ) ) ;
+""".format(geometries[0],geometries[1])
+# ST_Multi(ST_LineMerge(ST_Collect( '{}', '{}' )))
+# SELECT ST_Multi(ST_LineMerge( ST_Multi(ST_Collect( ST_LineMerge('{}'), ST_LineMerge('{}') )) ))
+        cursor.execute(query)
+        geometries = geometries[1:]
+        g = cursor.fetchall()[0][0]
+        #if len(g) > 1:
+        #    print("Whoops")
+        geometries[0] = g
+
+    query = """
+Select ST_Multi( '{}' );
+""".format(geometries[0])
+    cursor.execute(query)
+    geometries[0] = cursor.fetchall()[0][0]
+
+    return geometries[0]
+    #return cursor.fetchall()[0][0]
+
 
 def get_intersection_map(cursor: psycopg2.extensions.cursor) -> dict:
     ''' get all intersections associated with street segments '''
@@ -201,6 +245,39 @@ def create_road(intida: int, intidb: int, name: dict) -> set:
                 new_road.add(a)
     return new_road
 
+def test_weird_data(cursor: psycopg2.extensions.cursor, roads: dict, road) -> None:
+    query ="""
+DROP TABLE testroad;
+
+CREATE TABLE public.testroad (
+    roadid integer PRIMARY KEY,
+    geom public.geometry(MultiLineString,0), -- MultiLineString
+    name character varying(125),
+    ksi bigint,
+    injured bigint,
+    crashes bigint,
+    ksi_mile float8,
+    injured_mile float8,
+    crashes_mile float8
+);
+
+INSERT INTO testroad( roadid, geom, name, ksi, injured, crashes, ksi_mile, injured_mile, crashes_mile)
+VALUES (              {},     '{}',   '{}',   {},  {},      {},      {},       {},           {} );
+
+SELECT UpdateGeometrySRID('public', 'testroad', 'geom', 2227);
+""".format(road, 
+    create_road_geometry(cursor, list(roads[road]['segments']), roads[road]['name']),
+    roads[road]['name'],
+    roads[road]['ksi'], 
+    roads[road]['injured'],
+    roads[road]['crashes'],
+    roads[road]['ksi/mile'],
+    roads[road]['injured/mile'],
+    roads[road]['crashes/mile']
+    )
+    cursor.execute(query)
+
+
 def road_length(cursor: psycopg2.extensions.cursor, segments: set) -> float:
     ''' returns length of entire road in miles '''
     total_length = 0.0
@@ -226,7 +303,7 @@ WHERE intid = {}
     return total_length / FEETPERMILE
 
 if __name__ == '__main__':
-    cursor = db_setup()
+    cursor, conn = db_setup()
     roads = dict()
     names = dict()
 
@@ -304,15 +381,19 @@ if __name__ == '__main__':
     # write roads dictionary to JSON file
     with open(ROADSJSON, 'w') as f:
         f.write(json.dumps(roads, default=str, indent=4))
+    #  roadid 309
 
     # write roads to csv
     with open(ROADSCSV, 'w') as f:
         writer = csv.writer(f,delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(['roadid','geom','name','ksi','injured','crashes','ksi/mile','injured/mile','crashes/mile'])
         for road in roads:
+            if roads[road]['name'] == 'N 10th St':
+                print("found")
+                print(road)
             writer.writerow(
                 [road, 
-                create_road_geometry(cursor, list(roads[road]['segments'])),
+                create_road_geometry(cursor, list(roads[road]['segments']), roads[road]['name']),
                 roads[road]['name'],
                 roads[road]['ksi'], 
                 roads[road]['injured'],
@@ -321,3 +402,8 @@ if __name__ == '__main__':
                 roads[road]['injured/mile'],
                 roads[road]['crashes/mile']
                 ])
+    for road in roads:
+        if roads[road]['name'] == 'Sands Dr':
+            print("FOUND: {}".format(road))
+            test_weird_data(cursor, roads, road)
+    conn.commit()

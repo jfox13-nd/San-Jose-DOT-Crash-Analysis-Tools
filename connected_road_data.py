@@ -151,20 +151,6 @@ WHERE streetcenterlines.intid NOT IN
 
 def create_road_geometry(cursor: psycopg2.extensions.cursor, road: list, name) -> str:
     ''' create a linestring for a road '''
-    query ="""
-SELECT
-    (ST_Dump(ST_AsText(ST_LineMerge(ST_Union(geom))))).geom
-FROM streetcenterlines
-WHERE 
-"""
-    end_query = """
-GROUP BY fullname;
-"""
-    if road:
-        query = "{}\n\tintid = {}".format(query,road[0])
-    for segment in road[1:]:
-        query = "{}\n\tOR intid = {}".format(query,segment)
-    query = "{}\n{}".format(query,end_query)
 
     query ="""
 SELECT
@@ -177,31 +163,18 @@ WHERE
     for segment in road[1:]:
         query = "{}\n\tOR intid = {}".format(query,segment)
     query = '{};'.format(query)
-
-    if name == 'Sands Dr':
-        print(query)
     
     cursor.execute(query)
     geometries = [ i[0] for i in cursor.fetchall() ]
 
-    if name == 'New Street' and 78618 in road:
-        print(len(geometries))
-        print()
     while len(geometries) > 1:
-
-        query = """
-SELECT (ST_Dump(ST_AsText(ST_LineMerge(ST_Collect( '{}', '{}' ))))).geom ;
-""".format(geometries[0],geometries[1])
         query = """
 SELECT ST_LineMerge( ST_Union( ST_LineMerge('{}'), ST_LineMerge('{}') ) ) ;
 """.format(geometries[0],geometries[1])
-# ST_Multi(ST_LineMerge(ST_Collect( '{}', '{}' )))
-# SELECT ST_Multi(ST_LineMerge( ST_Multi(ST_Collect( ST_LineMerge('{}'), ST_LineMerge('{}') )) ))
+
         cursor.execute(query)
         geometries = geometries[1:]
         g = cursor.fetchall()[0][0]
-        #if len(g) > 1:
-        #    print("Whoops")
         geometries[0] = g
 
     query = """
@@ -211,7 +184,6 @@ Select ST_Multi( '{}' );
     geometries[0] = cursor.fetchall()[0][0]
 
     return geometries[0]
-    #return cursor.fetchall()[0][0]
 
 
 def get_intersection_map(cursor: psycopg2.extensions.cursor) -> dict:
@@ -402,8 +374,4 @@ if __name__ == '__main__':
                 roads[road]['injured/mile'],
                 roads[road]['crashes/mile']
                 ])
-    for road in roads:
-        if roads[road]['name'] == 'Sands Dr':
-            print("FOUND: {}".format(road))
-            test_weird_data(cursor, roads, road)
     conn.commit()

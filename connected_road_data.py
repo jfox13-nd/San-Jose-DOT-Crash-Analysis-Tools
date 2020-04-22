@@ -9,7 +9,6 @@ import csv
 import sys
 import psycopg2
 import datetime
-import functools
 
 USERNAME = "jfox13"
 DBLOCALNAME = "dot"
@@ -31,20 +30,8 @@ def db_setup() -> tuple:
         print("Error: Could not connect to SQL database {} as {}".format(DBLOCALNAME,USERNAME),file=sys.stderr)
         return None
 
-def get_ids(cursor: psycopg2.extensions.cursor, id_dict: dict) -> None:
-    ''' creates a dictionary with a intid key for every street segment '''
-    ids = set()
-    query ="""
-SELECT
-    intid
-FROM streetcenterlines;
-"""
-    cursor.execute(query)
-    for i in cursor.fetchall():
-        id_dict[int(i[0])] = set()
-
 def map_ids_intid(cursor: psycopg2.extensions.cursor, map_dict: dict) -> None:
-    ''' creates a dictionary that maps intid to id for street segments '''
+    ''' creates a dictionary that maps street segment intid to id '''
     query ="""
 SELECT
     id,
@@ -56,7 +43,7 @@ FROM streetcenterlines;
         map_dict[int(i[1])] = int(i[0])
 
 def analyze_segment(segments: list, street_data: dict, map_dict: dict) -> tuple:
-    ''' return the combined ksi, injured, and total crashes for a list of street segments '''
+    ''' returns (ksi, injured, crashes) for a list of street segments '''
     # create a crash_dict that holds all unique crashes (with relevant information) for the street segemnts
     crash_dict = {}
 
@@ -82,7 +69,7 @@ def analyze_segment(segments: list, street_data: dict, map_dict: dict) -> tuple:
     return ksi, injured, crashes
 
 def get_connections(cursor: psycopg2.extensions.cursor) -> list:
-    ''' get a list of all connected street segments where each element contains information on a pair of connected segments '''
+    ''' get a list of all connected street segments (physically connected segments that share a name) where each element contains information on a pair of connected segments '''
     query ="""
 SELECT
     STREETS.name,
@@ -115,7 +102,7 @@ WHERE
     return cursor.fetchall()
 
 def get_nonconnections(cursor: psycopg2.extensions.cursor) -> list:
-    ''' get a list of all connected street segments where each element contains information on a pair of connected segments '''
+    ''' get a list of all unconnected street segments (street segments that have no connecting segments with the same name) where each element contains information on a pair of connected segments '''
     query ="""
 SELECT
     streetcenterlines.intid,
@@ -149,15 +136,17 @@ WHERE streetcenterlines.intid NOT IN
     cursor.execute(query)
     return cursor.fetchall()
 
-def create_road_geometry(cursor: psycopg2.extensions.cursor, road: list, name) -> str:
-    ''' create a linestring for a road '''
+def create_road_geometry(cursor: psycopg2.extensions.cursor, road: list) -> str:
+    ''' create a linestring geom for a road from a list of its segments '''
 
     query ="""
 SELECT
-    ST_LineMerge(geom) -- ST_Multi(ST_LineMerge(geom))
+    ST_LineMerge(geom)
 FROM streetcenterlines
 WHERE
 """
+
+    # modify query list out each relevant segment intid
     if road:
         query = "{}\n\tintid = {}".format(query,road[0])
     for segment in road[1:]:
@@ -167,6 +156,7 @@ WHERE
     cursor.execute(query)
     geometries = [ i[0] for i in cursor.fetchall() ]
 
+    # join the first two road segment geometries, slice off the first geometry in the list, then overwrite the new first geometry in the list with the joined result
     while len(geometries) > 1:
         query = """
 SELECT ST_LineMerge( ST_Union( ST_LineMerge('{}'), ST_LineMerge('{}') ) ) ;
@@ -187,7 +177,7 @@ Select ST_Multi( '{}' );
 
 
 def get_intersection_map(cursor: psycopg2.extensions.cursor) -> dict:
-    ''' get all intersections associated with street segments '''
+    ''' get a map of street segment intid to (frominteri, tointeri, streetclas) '''
     intersection_map = dict()
     query ="""
 SELECT
@@ -216,40 +206,7 @@ def create_road(intida: int, intidb: int, name: dict) -> set:
             elif b in new_road and a not in new_road:
                 road_expanded = True
                 new_road.add(a)
-    return new_road
-
-def test_weird_data(cursor: psycopg2.extensions.cursor, roads: dict, road) -> None:
-    query ="""
-DROP TABLE testroad;
-
-CREATE TABLE public.testroad (
-    roadid integer PRIMARY KEY,
-    geom public.geometry(MultiLineString,0), -- MultiLineString
-    name character varying(125),
-    ksi bigint,
-    injured bigint,
-    crashes bigint,
-    ksi_mile float8,
-    injured_mile float8,
-    crashes_mile float8
-);
-
-INSERT INTO testroad( roadid, geom, name, ksi, injured, crashes, ksi_mile, injured_mile, crashes_mile)
-VALUES (              {},     '{}',   '{}',   {},  {},      {},      {},       {},           {} );
-
-SELECT UpdateGeometrySRID('public', 'testroad', 'geom', 2227);
-""".format(road, 
-    create_road_geometry(cursor, list(roads[road]['segments']), roads[road]['name']),
-    roads[road]['name'],
-    roads[road]['ksi'], 
-    roads[road]['injured'],
-    roads[road]['crashes'],
-    roads[road]['ksi/mile'],
-    roads[road]['injured/mile'],
-    roads[road]['crashes/mile']
-    )
-    cursor.execute(query)
-
+    return new_road 
 
 def road_length(cursor: psycopg2.extensions.cursor, segments: set) -> float:
     ''' returns length of entire road in miles '''
@@ -377,7 +334,7 @@ if __name__ == '__main__':
                 road_class = classes[0]
             writer.writerow(
                 [road, 
-                create_road_geometry(cursor, list(roads[road]['segments']), roads[road]['name']),
+                create_road_geometry(cursor, list(roads[road]['segments'])),
                 roads[road]['name'],
                 road_class,
                 relevant_road,

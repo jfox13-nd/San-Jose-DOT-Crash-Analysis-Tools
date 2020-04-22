@@ -1,4 +1,4 @@
 {
-    postgres_username = "jfox13",
-    postgres_da
+    "postgres_username": "jfox13",
+    "postgres_database_name": "dot",
 }

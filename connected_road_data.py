@@ -12,10 +12,14 @@ import datetime
 
 USERNAME = "jfox13"
 DBLOCALNAME = "dot"
+FEETPERMILE = 5280.0
+
+# Files that roads data will be written to
 ROADSJSON = 'roads.json'
 ROADSCSV = 'roads.csv'
+
+# Files that will be read containing street segment JSON data
 STREETDATA = 'street_data.json'
-FEETPERMILE = 5280.0
 
 def db_setup() -> tuple:
     ''' connect to postgres database '''

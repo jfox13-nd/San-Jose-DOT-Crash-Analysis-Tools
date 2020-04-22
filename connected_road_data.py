@@ -353,6 +353,9 @@ if __name__ == '__main__':
         roads[road]['street_classification'] = set()
         for segment in roads[road]['segments']:
             roads[road]['street_classification'].add(intersection_map[segment][2])
+        roads[road]['segments'] = list(roads[road]['segments'])
+        roads[road]['street_classification'] = list(roads[road]['street_classification'])
+        roads[road]['intersections'] = list(roads[road]['intersections'])
 
     # write roads dictionary to JSON file
     with open(ROADSJSON, 'w') as f:
@@ -361,9 +364,13 @@ if __name__ == '__main__':
     # write roads to csv
     with open(ROADSCSV, 'w') as f:
         writer = csv.writer(f,delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['roadid','geom','name', 'street_classification', 'ksi','injured','crashes','ksi/mile','injured/mile','crashes/mile'])
+        writer.writerow(['roadid','geom','name', 'street_classification', 'relevant_road', 'ksi','injured','crashes','ksi/mile','injured/mile','crashes/mile'])
         for road in roads:
-            classes = list(roads[road]['street_classification'])
+            classes = roads[road]['street_classification']
+            if 'CO' in classes or 'MA' in classes or 'MI' in classes or 'EX' in classes:
+                relevant_road = 'true'
+            else:
+                relevant_road = 'false'
             if len(classes) != 1:
                 road_class = 'Mixed'
             else:
@@ -373,6 +380,7 @@ if __name__ == '__main__':
                 create_road_geometry(cursor, list(roads[road]['segments']), roads[road]['name']),
                 roads[road]['name'],
                 road_class,
+                relevant_road,
                 roads[road]['ksi'], 
                 roads[road]['injured'],
                 roads[road]['crashes'],

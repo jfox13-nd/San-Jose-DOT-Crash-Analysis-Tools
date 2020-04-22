@@ -9,32 +9,16 @@ import csv
 import sys
 import psycopg2
 import datetime
+from sql_utils import db_setup, FEETPERMILE, RAWCRASHCSV
 
-OUTPUTFILE = "crash_locations.json"
-CSVNAME = 'CrashTable2014_2018_OpenData.csv'
-USERNAME = "jfox13"
-DBLOCALNAME = "dot"
-OUTPUTJSON = "crash_locations.json"
-OUTPUTCSV = "crash_locations.csv"
-OUTPUTINJURED = "injured.csv"
-OUTPUTKSI = "ksi.csv"
-STREETJSON = "street_data.json"
-STREET_CRASH_RELATIONSHIP = 'street_to_crash.csv'
-STREETCSV = 'street_data.csv'
-
-def db_setup() -> psycopg2.extensions.cursor:
-    ''' connect to postgres database '''
-    try:
-        connection = psycopg2.connect(user = USERNAME,
-                                    host = "127.0.0.1",
-                                    port = "5432",
-                                    database = DBLOCALNAME)
-        cursor = connection.cursor()
-        return cursor
-    except:
-        print("Error: Could not connect to SQL database {} as {}".format(DBLOCALNAME,USERNAME),file=sys.stderr)
-        return None
-
+CSVNAME = RAWCRASHCSV
+OUTPUTJSON = "data/crash_locations.json"
+OUTPUTCSV = "data/crash_locations.csv"
+OUTPUTINJURED = "data/injured.csv"
+OUTPUTKSI = "data/ksi.csv"
+STREETJSON = "data/street_data.json"
+STREET_CRASH_RELATIONSHIP = 'data/street_to_crash.csv'
+STREETCSV = 'data/street_data.csv'
 
 def all_streets_from_inter(intnum: int) -> str:
     ''' return query string to get all streets connected to a given intersection '''
@@ -167,10 +151,11 @@ def street_list_from_crash(crash_data: dict, crash: int, cursor: psycopg2.extens
 
 def feet_to_mile(feet: float) -> float:
     ''' convert feet to miles '''
-    return feet / 5280.0
+    return feet / FEETPERMILE
 
 if __name__ == '__main__':
-    cursor = db_setup()
+    print("Gathering crash data for street segments")
+    cursor, conn = db_setup()
     crash_data = read_crash_csv()
     street_crashes = dict()
 
@@ -219,6 +204,7 @@ if __name__ == '__main__':
             street_crashes[street]['injured/mile'] = None
             street_crashes[street]['crashes/mile'] = None
 
+    print("Writing street segment data")
     # Creates CSV and JSON representations of street_crashes
     with open(STREETJSON, 'w') as f:
         f.write(json.dumps(street_crashes, default=str, indent=4))

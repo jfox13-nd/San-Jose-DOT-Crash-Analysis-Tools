@@ -7,27 +7,13 @@ __email__ = "jfox13@nd.edu"
 import json
 import csv
 import psycopg2
+from sql_utils import db_setup, RAWCRASHCSV
 
-CSVNAME = 'CrashTable2014_2018_OpenData.csv'
-USERNAME = "jfox13"
-DBLOCALNAME = "dot"
+CSVNAME = RAWCRASHCSV
 OUTPUTJSON = "crash_locations.json"
 OUTPUTCSV = "crash_locations.csv"
 OUTPUTINJURED = "injured.csv"
 OUTPUTKSI = "ksi.csv"
-
-def db_setup() -> None:
-    ''' connect to postgres database '''
-    try:
-        connection = psycopg2.connect(user = USERNAME,
-                                    host = "127.0.0.1",
-                                    port = "5432",
-                                    database = DBLOCALNAME)
-        cursor = connection.cursor()
-        return cursor
-    except:
-        print("Error: Could not connect to SQL database {} as {}".format(DBLOCALNAME,USERNAME),file=sys.stderr)
-        return None
 
 def read_crash_csv():
     crash_data = dict()
@@ -138,11 +124,12 @@ def clean_severity(n):
     return int(n)
 
 if __name__ == '__main__':
-    cursor = db_setup()
+    print("Producing crash locations point outputs")
+    cursor, conn = db_setup()
     d = read_crash_csv()
     good = 0
     bad = 0
-    print("READ DONE")
+
     length = len(d)
     i = 0
     for crash in d:
@@ -156,7 +143,9 @@ if __name__ == '__main__':
             good += 1
         else:
             bad += 1
-    print("good = {} \n bad = {}".format(good,bad))
+    print("Crash locations found = {} \n Crash locations not found = {}".format(good,bad))
+
+    print("Writing crash locations point outputs")
 
     with open(OUTPUTJSON, 'w') as f:
         f.write(json.dumps(d,indent=4))

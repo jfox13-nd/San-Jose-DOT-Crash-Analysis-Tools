@@ -9,10 +9,7 @@ import csv
 import sys
 import psycopg2
 import datetime
-
-USERNAME = "jfox13"
-DBLOCALNAME = "dot"
-FEETPERMILE = 5280.0
+from sql_utils import db_setup, FEETPERMILE
 
 # Files that roads data will be written to
 ROADSJSON = 'roads.json'
@@ -20,19 +17,6 @@ ROADSCSV = 'roads.csv'
 
 # Files that will be read containing street segment JSON data
 STREETDATA = 'street_data.json'
-
-def db_setup() -> tuple:
-    ''' connect to postgres database '''
-    try:
-        connection = psycopg2.connect(user = USERNAME,
-                                    host = "127.0.0.1",
-                                    port = "5432",
-                                    database = DBLOCALNAME)
-        cursor = connection.cursor()
-        return cursor, connection
-    except:
-        print("Error: Could not connect to SQL database {} as {}".format(DBLOCALNAME,USERNAME),file=sys.stderr)
-        return None
 
 def map_ids_intid(cursor: psycopg2.extensions.cursor, map_dict: dict) -> None:
     ''' creates a dictionary that maps street segment intid to id '''
@@ -237,6 +221,7 @@ WHERE intid = {}
     return total_length / FEETPERMILE
 
 if __name__ == '__main__':
+    print("Gathering crash data for connected roads")
     cursor, conn = db_setup()
     roads = dict()
     names = dict()
@@ -317,6 +302,8 @@ if __name__ == '__main__':
         roads[road]['segments'] = list(roads[road]['segments'])
         roads[road]['street_classification'] = list(roads[road]['street_classification'])
         roads[road]['intersections'] = list(roads[road]['intersections'])
+
+    print("Writing connected road data")
 
     # write roads dictionary to JSON file
     with open(ROADSJSON, 'w') as f:

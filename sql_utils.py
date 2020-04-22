@@ -8,6 +8,7 @@ import json
 
 USERNAME = ""
 DBLOCALNAME = ""
+RAWCRASHCSV = ""
 
 FEETPERMILE = 5280.0
 
@@ -28,4 +29,4 @@ with open(".personal_data", 'r') as f:
     personal_data = json.load(f)
     USERNAME = personal_data["postgres_username"]
     DBLOCALNAME = personal_data["postgres_database_name"]
-    RAWCRASHCSV = personal_data["raw_crash_csv"]
+    RAWCRASHCSV = "data/{}".format(personal_data["raw_crash_csv"])

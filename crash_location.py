@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 
-'''crash_location.py: script to produce json file of all crash coordinates'''
+'''
+crash_location.py: script to produce output files of all crash coordinates
+
+Outputs:
+crash_locations.json: for each crash will include actual coordinates, intersection relative location and direction, ksi, injured
+crash_locations.csv: the longitude and lattitude for each crash
+injured.csv: the longitude and lattitude of each injury
+ksi.csv: the longitude and lattitude of each injury
+'''
 __author__ = "Jack Fox"
 __email__ = "jfox13@nd.edu"
 
@@ -10,10 +18,10 @@ import psycopg2
 from sql_utils import db_setup, RAWCRASHCSV
 
 CSVNAME = RAWCRASHCSV
-OUTPUTJSON = "crash_locations.json"
-OUTPUTCSV = "crash_locations.csv"
-OUTPUTINJURED = "injured.csv"
-OUTPUTKSI = "ksi.csv"
+OUTPUTJSON = "data/crash_locations.json"
+OUTPUTCSV = "data/crash_locations.csv"
+OUTPUTINJURED = "data/injured.csv"
+OUTPUTKSI = "data/ksi.csv"
 
 def read_crash_csv():
     crash_data = dict()
@@ -58,11 +66,6 @@ def read_crash_csv():
             crash_data[crash_id]['distance'] = distance
             crash_data[crash_id]['ksi'] = calc_KSI(fatal, major)
             crash_data[crash_id]['injured'] = calc_total_injured(fatal, major, moderate, minor)
-
-    #s = set()
-    #for c in crash_data:
-    #    s.add(crash_data[c]['direction'])
-    #print(s)
 
     return crash_data            
     
@@ -124,7 +127,7 @@ def clean_severity(n):
     return int(n)
 
 if __name__ == '__main__':
-    print("Producing crash locations point outputs")
+    print("crash_location.py: Producing crash locations point outputs")
     cursor, conn = db_setup()
     d = read_crash_csv()
     good = 0
@@ -135,7 +138,7 @@ if __name__ == '__main__':
     for crash in d:
         i += 1
         if not i % 1000:
-            print('progress {}'.format(i/length))
+            print('crash_location.py: Progress {}'.format(i/length))
         add_gps(d,crash,cursor)
 
     for crash in d:
@@ -143,9 +146,9 @@ if __name__ == '__main__':
             good += 1
         else:
             bad += 1
-    print("Crash locations found = {} \n Crash locations not found = {}".format(good,bad))
+    print("crash_location.py:\n\tCrash locations found = {} \n\t Crash locations not found = {}".format(good,bad))
 
-    print("Writing crash locations point outputs")
+    print("crash_location.py: Writing crash locations point outputs")
 
     with open(OUTPUTJSON, 'w') as f:
         f.write(json.dumps(d,indent=4))

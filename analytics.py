@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 
-'''analytics.py: creates multiple files to represent none data about crashes on each street segment'''
+'''
+analytics.py: creates multiple files to represent data about crashes on each street segment
+
+Output:
+street_data.json: for each street segment gives all statistics and crashes
+street_to_crash.csv: csv file for matching street segments to crashes
+street_data.csv: basic stats for each street segment
+'''
 __author__ = "Jack Fox"
 __email__ = "jfox13@nd.edu"
 
@@ -11,11 +18,10 @@ import psycopg2
 import datetime
 from sql_utils import db_setup, FEETPERMILE, RAWCRASHCSV
 
+# Files read
 CSVNAME = RAWCRASHCSV
-OUTPUTJSON = "data/crash_locations.json"
-OUTPUTCSV = "data/crash_locations.csv"
-OUTPUTINJURED = "data/injured.csv"
-OUTPUTKSI = "data/ksi.csv"
+
+# Files written
 STREETJSON = "data/street_data.json"
 STREET_CRASH_RELATIONSHIP = 'data/street_to_crash.csv'
 STREETCSV = 'data/street_data.csv'
@@ -154,7 +160,7 @@ def feet_to_mile(feet: float) -> float:
     return feet / FEETPERMILE
 
 if __name__ == '__main__':
-    print("Gathering crash data for street segments")
+    print("analytics.py: Gathering crash data for street segments")
     cursor, conn = db_setup()
     crash_data = read_crash_csv()
     street_crashes = dict()
@@ -165,7 +171,7 @@ if __name__ == '__main__':
         # prints progress to terminal
         i += 1
         if not i % 500:
-            print('progress {:.2f}%'.format(100.0*i/total_crashes))
+            print('analytics.py: Progress {:.2f}%'.format(100.0*i/total_crashes))
 
         # discovers all streets affected by a crash
         streets = street_list_from_crash(crash_data,crash,cursor)
@@ -204,7 +210,7 @@ if __name__ == '__main__':
             street_crashes[street]['injured/mile'] = None
             street_crashes[street]['crashes/mile'] = None
 
-    print("Writing street segment data")
+    print("analytics.py: Writing street segment data")
     # Creates CSV and JSON representations of street_crashes
     with open(STREETJSON, 'w') as f:
         f.write(json.dumps(street_crashes, default=str, indent=4))

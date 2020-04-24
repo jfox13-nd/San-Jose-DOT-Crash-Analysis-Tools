@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 
-'''connected_road_data.py'''
+'''
+connected_road_data.py: creates multiple files to represent data about crashes on each road
+
+Outputs:
+roads.json: for each road will include street segment and intersections within and stats
+roads.csv: for each road will include geometry and stats
+'''
 __author__ = "Jack Fox"
 __email__ = "jfox13@nd.edu"
 
@@ -12,11 +18,11 @@ import datetime
 from sql_utils import db_setup, FEETPERMILE
 
 # Files that roads data will be written to
-ROADSJSON = 'roads.json'
-ROADSCSV = 'roads.csv'
+ROADSJSON = 'data/roads.json'
+ROADSCSV = 'data/roads.csv'
 
 # Files that will be read containing street segment JSON data
-STREETDATA = 'street_data.json'
+STREETDATA = 'data/street_data.json'
 
 def map_ids_intid(cursor: psycopg2.extensions.cursor, map_dict: dict) -> None:
     ''' creates a dictionary that maps street segment intid to id '''
@@ -221,7 +227,7 @@ WHERE intid = {}
     return total_length / FEETPERMILE
 
 if __name__ == '__main__':
-    print("Gathering crash data for connected roads")
+    print("connected_road_data.py: Gathering crash data for connected roads")
     cursor, conn = db_setup()
     roads = dict()
     names = dict()
@@ -303,7 +309,7 @@ if __name__ == '__main__':
         roads[road]['street_classification'] = list(roads[road]['street_classification'])
         roads[road]['intersections'] = list(roads[road]['intersections'])
 
-    print("Writing connected road data")
+    print("connected_road_data.py: Writing connected road data")
 
     # write roads dictionary to JSON file
     with open(ROADSJSON, 'w') as f:

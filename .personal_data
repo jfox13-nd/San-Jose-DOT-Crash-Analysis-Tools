@@ -1,5 +1,5 @@
 {
-    "postgres_username": "jfox13",
-    "postgres_database_name": "dot",
-    "raw_crash_csv": "CrashTable2014_2018_OpenData.csv"
+    "postgres_username": "",
+    "postgres_database_name": "",
+    "raw_crash_csv": ""
 }

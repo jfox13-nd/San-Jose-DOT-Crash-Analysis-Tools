@@ -4,7 +4,7 @@
 
 ### 1. Clone this repository
 ```bash
-git clone PUT URL HERE
+git clone https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools.git
 ```
 
 ### 2. Clone and setup the [San-Jose-DOT-Crash-Locator Repo](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Locator)
@@ -15,7 +15,7 @@ git clone https://github.com/jfox13-nd/San-Jose-DOT-Crash-Locator.git
 ```
 
 ### 3. Add a CSV containing crash data in the following format:
-Place this csv in the data/ directory.
+Place this csv in the [data/](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/tree/production/data) directory.
 This document will be referred to as raw_crash.csv for the remainder of this document, but it can be named whatever you like as long as you write the proper name in step 4.
 ```CSV
 AccidentId,DateDimId,AccidentDateTime,TcrNumber,IntersectionDimId,IntersectionId,Latitude,Longitude,Vehicle_Dir,Distance,AStreetPrefixDirection,AStreetNameAndSuffix,AStreetSuffixDirection,AStreetType,BStreetPrefixDirection,BStreetNameAndSuffix,BStreetSuffixDirection,BStreetType,MapPage,MapQuadrant,CouncilDistrict,Jurisdiction,TrafficControlType,ATIntersection,BTIntersection,A1WayIntersection,B1WayIntersection,Shop,IntersectionDirection,IntersectionType,SniDistrict,Int_Type,Vehicle_Involved_With,Road_Cond,Light_Cond,Weather,Road_Surface,Collision_Type,Prim_Collision_Factor,Ped_Dir,Ped_Action,Traffic_Control,CityDamageFlag,ShortFormFlag,FatalInjuries,MajorInjuries,ModerateInjuries,MinorInjuries,ESRI_OID
@@ -23,7 +23,7 @@ AccidentId,DateDimId,AccidentDateTime,TcrNumber,IntersectionDimId,IntersectionId
 ...
 ```
 
-### 4. Add relevant data to .personal_data
+### 4. Add relevant data to [.personal_data](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/.personal_data)
 You must fill in the information for 
 ```JSON
 {
@@ -34,9 +34,9 @@ You must fill in the information for
 ```
 
 ### 5. Run relevant scripts
-All script outputs will be kept in the \data folder. If a script requires files these must be kept in the same folder.
+All script outputs will be kept in the [\data](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/tree/production/data) folder. If a script requires files these must be kept in the same folder.
 
-#### crash_location.py
+#### [crash_location.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/crash_location.py)
 This will produce output files containing the GPS coordinates of all crashes.
 
 ##### Required inputs:
@@ -48,7 +48,7 @@ crash_locations.csv: the longitude and lattitude for each crash
 injured.csv: the longitude and lattitude of each injury
 ksi.csv: the longitude and lattitude of each injury
 
-#### analytics.py
+#### [analytics.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/analytics.py)
 This will produce multiple files to represent data about crashes on each street segment.
 
 ##### Required inputs:
@@ -59,11 +59,11 @@ street_data.json: for each street segment gives all statistics and crashes
 street_to_crash.csv: csv file for matching street segments to crashes
 street_data.csv: basic stats for each street segment
 
-#### connected_road_data.py
+#### [connected_road_data.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/connected_road_data.py)
 This will create multiple files to represent data about crashes on each road. It must be run after analytics.py.
 
 ##### Required inputs:
-street_data.json (analytics.py):
+street_data.json ([analytics.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/analytics.py)):
 
 ##### Outputs:
 roads.json: for each road will include street segment and intersections within and stats

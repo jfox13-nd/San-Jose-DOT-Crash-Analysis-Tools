@@ -23,7 +23,7 @@ AccidentId,DateDimId,AccidentDateTime,TcrNumber,IntersectionDimId,IntersectionId
 ...
 ```
 
-### Add relevant data to .personal_data
+### 4. Add relevant data to .personal_data
 You must fill in the information for 
 ```JSON
 {
@@ -33,7 +33,7 @@ You must fill in the information for
 }
 ```
 
-### Run relevant scripts
+### 5. Run relevant scripts
 All script outputs will be kept in the \data folder. If a script requires files these must be kept in the same folder.
 
 #### crash_location.py

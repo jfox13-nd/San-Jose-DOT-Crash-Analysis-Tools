@@ -38,6 +38,7 @@ You must fill in the information in [.personal_data](https://github.com/jfox13-n
 
 ### 5. Run relevant scripts
 All script outputs will be kept in the [\data](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/tree/production/data) folder. If a script requires files these must be kept in the same folder.
+Running the bash script [run_all_scripts.sh](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/run_all_scripts.sh) will run all scripts in the correct order, including [load_personal.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/load_personal.py).
 
 #### [crash_location.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/crash_location.py)
 This will produce output files containing the GPS coordinates of all crashes.

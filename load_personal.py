@@ -14,7 +14,7 @@ if __name__ == '__main__':
     print("Please make sure you have followed all setup instructions properly before this point.\n\nPlease provide your user specific data:")
     username = input("Postgres username:").strip()
     db_name = input("Postgres database name:").strip()
-    raw_crash = "data/{}".format(input("CSV with raw crash data:").strip())
+    raw_crash = input("CSV with raw crash data:").strip()
 
     personal_data = {
         "postgres_username": username,
@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     # test raw_crash_path
     try:
-        with open(raw_crash) as csv_file:
+        with open("data/{}".format(raw_crash)) as csv_file:
             try:
                 csv_reader = csv.reader(csv_file, delimiter=',')
                 for row in csv_reader:

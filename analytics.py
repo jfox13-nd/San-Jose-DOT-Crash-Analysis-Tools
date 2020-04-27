@@ -16,7 +16,7 @@ import csv
 import sys
 import psycopg2
 import datetime
-from sql_utils import db_setup, FEETPERMILE, RAWCRASHCSV
+from utils import db_setup, FEETPERMILE, RAWCRASHCSV, progress_bar_setup, progress_bar_increment, progress_bar_finish
 
 # Files read
 CSVNAME = RAWCRASHCSV
@@ -167,11 +167,12 @@ if __name__ == '__main__':
 
     i = 0
     total_crashes = len(crash_data)
+    progress_bar_setup()
+
     for crash in crash_data:
         # prints progress to terminal
         i += 1
-        if not i % 500:
-            print('analytics.py: Progress {:.2f}%'.format(100.0*i/total_crashes))
+        progress_bar_increment(i,total_crashes)
 
         # discovers all streets affected by a crash
         streets = street_list_from_crash(crash_data,crash,cursor)
@@ -193,6 +194,7 @@ if __name__ == '__main__':
             street_crashes[street]['crashes'][crash]['ksi'] = crash_data[crash]['ksi']
             street_crashes[street]['injured'] += crash_data[crash]['injured']
             street_crashes[street]['ksi'] += crash_data[crash]['ksi']
+    progress_bar_finish()
 
     # calculate ksi/mile, injured/mile, etc. for each street in the street_crashes dictionary
     for street in street_crashes:

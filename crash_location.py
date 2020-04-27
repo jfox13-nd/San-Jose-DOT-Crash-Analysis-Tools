@@ -15,7 +15,7 @@ __email__ = "jfox13@nd.edu"
 import json
 import csv
 import psycopg2
-from sql_utils import db_setup, RAWCRASHCSV
+from utils import db_setup, RAWCRASHCSV, progress_bar_setup, progress_bar_increment, progress_bar_finish
 
 CSVNAME = RAWCRASHCSV
 OUTPUTJSON = "data/crash_locations.json"
@@ -135,11 +135,12 @@ if __name__ == '__main__':
 
     length = len(d)
     i = 0
+    progress_bar_setup()
     for crash in d:
         i += 1
-        if not i % 1000:
-            print('crash_location.py: Progress {}'.format(i/length))
+        progress_bar_increment(i,length)
         add_gps(d,crash,cursor)
+    progress_bar_finish()
 
     for crash in d:
         if d[crash]['longitude']:

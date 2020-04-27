@@ -15,7 +15,7 @@ import csv
 import sys
 import psycopg2
 import datetime
-from sql_utils import db_setup, FEETPERMILE
+from utils import db_setup, FEETPERMILE
 
 # Files that roads data will be written to
 ROADSJSON = 'data/roads.json'

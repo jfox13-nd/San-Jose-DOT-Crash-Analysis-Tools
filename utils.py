@@ -6,6 +6,7 @@ __email__ = "jfox13@nd.edu"
 
 import json
 import sys
+import psycopg2
 
 USERNAME = ""
 DBLOCALNAME = ""

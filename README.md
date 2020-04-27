@@ -27,7 +27,7 @@ AccidentId,DateDimId,AccidentDateTime,TcrNumber,IntersectionDimId,IntersectionId
 ```
 
 ### 4. Add relevant data to [.personal_data](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/.personal_data)
-You must fill in the information for 
+You must fill in the information in [.personal_data](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/.personal_data). This can be easily done with the setup script [load_personal.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/load_personal.py). The end result should look as follows:
 ```JSON
 {
     "postgres_username": "your postgres username",

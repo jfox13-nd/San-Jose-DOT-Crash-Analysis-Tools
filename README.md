@@ -1,5 +1,8 @@
 # San Jose Crash Data Analysis Tools
 
+## Description
+These tools are for use by San Jose Vision Zero within the San Jose DOT. Given correctly formatted data on crash locations these scipts will infer the GPS coordinates of those crashes and conduct further analysis from that data. Multiple CSV and JSON files will be output that will describe the relationships between crashes, street segments, and roads.
+
 ## Setup
 
 ### 1. Clone this repository

@@ -81,6 +81,9 @@ FROM
         streetcenterlines.tointerid as b,
         streetcenterlines.fullname AS name
     FROM streetcenterlines
+    WHERE
+        LOWER(streetcenterlines.munileft) = 'sj' 
+        OR LOWER(streetcenterlines.muniright) = 'sj'
     ) AS STREETS,
     streetcenterlines
 WHERE
@@ -90,7 +93,11 @@ WHERE
     OR streetcenterlines.tointerid = STREETS.b
     )
     AND STREETS.name = streetcenterlines.fullname
-    AND STREETS.id != streetcenterlines.id;
+    AND STREETS.id != streetcenterlines.id
+    AND (
+        LOWER(streetcenterlines.munileft) = 'sj' 
+        OR LOWER(streetcenterlines.muniright) = 'sj'
+    );
 """
     cursor.execute(query)
     return cursor.fetchall()
@@ -125,6 +132,10 @@ WHERE streetcenterlines.intid NOT IN
         )
         AND STREETS.name = streetcenterlines.fullname
         AND STREETS.id != streetcenterlines.id
+    )
+    AND (
+        LOWER(streetcenterlines.munileft) = 'sj' 
+        OR LOWER(streetcenterlines.muniright) = 'sj'
     );
 """
     cursor.execute(query)

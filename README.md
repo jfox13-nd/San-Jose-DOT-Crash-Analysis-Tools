@@ -10,6 +10,8 @@ These tools are for use by San Jose Vision Zero within the San Jose DOT. Given c
     * A collection of contiguous street segments with the same name and DOT street classification
     * Every street segment within a road must touch territory under the jurisdiction of the city of San Jose
         * The "munileft" or the "muniright" field for that street segment must have a value of "sj"
+* KSI
+    * A traffic crash where an involved party was killed or severly injured
 
 ## Setup
 

@@ -72,14 +72,16 @@ SELECT
     streetcenterlines.id,
     streetcenterlines.intid,
     STREETS.a,
-    STREETS.b
+    STREETS.b,
+    STREETS.streetclas
 FROM
     (SELECT
         streetcenterlines.id,
         streetcenterlines.intid,
-        streetcenterlines.frominteri as a,
-        streetcenterlines.tointerid as b,
-        streetcenterlines.fullname AS name
+        streetcenterlines.frominteri AS a,
+        streetcenterlines.tointerid AS b,
+        streetcenterlines.fullname AS name,
+        streetcenterlines.streetclas AS streetclas
     FROM streetcenterlines
     WHERE
         LOWER(streetcenterlines.munileft) = 'sj' 
@@ -97,7 +99,9 @@ WHERE
     AND (
         LOWER(streetcenterlines.munileft) = 'sj' 
         OR LOWER(streetcenterlines.muniright) = 'sj'
-    );
+    )
+    AND STREETS.streetclas = streetcenterlines.streetclas
+    ;
 """
     cursor.execute(query)
     return cursor.fetchall()
@@ -109,7 +113,8 @@ SELECT
     streetcenterlines.intid,
     streetcenterlines.frominteri,
     streetcenterlines.tointerid,
-    streetcenterlines.fullname
+    streetcenterlines.fullname,
+    streetcenterlines.streetclas
 FROM streetcenterlines
 WHERE streetcenterlines.intid NOT IN
     (SELECT
@@ -118,9 +123,10 @@ WHERE streetcenterlines.intid NOT IN
         (SELECT
             streetcenterlines.id,
             streetcenterlines.intid,
-            streetcenterlines.frominteri as a,
-            streetcenterlines.tointerid as b,
-            streetcenterlines.fullname AS name
+            streetcenterlines.frominteri AS a,
+            streetcenterlines.tointerid AS b,
+            streetcenterlines.fullname AS name,
+            streetcenterlines.streetclas AS streetclas
         FROM streetcenterlines
         ) AS STREETS,
         streetcenterlines
@@ -132,6 +138,7 @@ WHERE streetcenterlines.intid NOT IN
         )
         AND STREETS.name = streetcenterlines.fullname
         AND STREETS.id != streetcenterlines.id
+        AND STREETS.streetclas = streetcenterlines.streetclas
     )
     AND (
         LOWER(streetcenterlines.munileft) = 'sj' 
@@ -249,18 +256,19 @@ if __name__ == '__main__':
     connections = get_connections(cursor)
 
     # parse connections list, create name dictionary that maps each street names to all street segment connections with that street name
-    for name, ida, intida, idb, intidb, intersectiona, intersectionb in connections:
+    for name, ida, intida, idb, intidb, intersectiona, intersectionb, streetclas in connections:
         ida = int(ida)
         idb = int(idb)
         intida = int(intida)
         intidb = int(intidb)
         intersectiona = int(intersectiona)
         intersectionb = int(intersectionb)
+        key = (name,streetclas)
 
-        if not name in names:
-            names[name] = dict()
-        names[name][(intida,intidb)] = (intersectiona, intersectionb)
-        names[name][(intidb,intida)] = (intersectiona, intersectionb)
+        if not key in names:
+            names[key] = dict()
+        names[key][(intida,intidb)] = (intersectiona, intersectionb)
+        names[key][(intidb,intida)] = (intersectiona, intersectionb)
 
     # finds all roads (sets of connected street segments of the same name) with a given street name, adds this list of sets to the names dictionary
     for name in names:
@@ -285,7 +293,7 @@ if __name__ == '__main__':
         streets = names[name]['roads']
         for street in streets:
             roads[road_id] = dict()
-            roads[road_id]['name'] = name
+            roads[road_id]['name'] = name[0]
             roads[road_id]['segments'] = street
             roads[road_id]['intersections']  = set(map(lambda x: intersection_map[x][0], street))
             roads[road_id]['intersections'] |= set(map(lambda x: intersection_map[x][1], street))
@@ -337,6 +345,7 @@ if __name__ == '__main__':
             else:
                 relevant_road = 'false'
             if len(classes) != 1:
+                print("{}: {}",roads[road]['name'],classes)
                 road_class = 'Mixed'
             else:
                 road_class = classes[0]

@@ -3,6 +3,12 @@
 ## Description
 These tools are for use by San Jose Vision Zero within the San Jose DOT. Given correctly formatted data on crash locations these scipts will infer the GPS coordinates of those crashes and conduct further analysis from that data. Multiple CSV and JSON files will be output that will describe the relationships between crashes, street segments, and roads.
 
+## Terminology
+* Street Segment
+    * The geometry of a single feature in the DOT's "Street Centerlines" map of San Jose
+* Road
+    * A collection of contiguous street segments with the same name and DOT street classification
+
 ## Setup
 
 ### 1. Clone this repository

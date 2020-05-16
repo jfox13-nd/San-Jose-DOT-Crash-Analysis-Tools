@@ -39,7 +39,7 @@ if __name__ == '__main__':
                 csv_reader = csv.reader(csv_file, delimiter=',')
                 for row in csv_reader:
                     if len(row) != CSV_FIELDS:
-                        print("1Error: Provided CSV not properly formatted",file=sys.stdout)
+                        print("Error: Provided CSV not properly formatted",file=sys.stdout)
                         sys.exit(1)
             except:
                 print("Error: Provided CSV not properly formatted",file=sys.stdout)

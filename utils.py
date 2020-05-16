@@ -9,6 +9,7 @@ import sys
 import psycopg2
 
 USERNAME = ""
+PASSWORD = ""
 DBLOCALNAME = ""
 RAWCRASHCSV = ""
 
@@ -19,6 +20,7 @@ def db_setup() -> tuple:
     ''' connect to postgres database '''
     try:
         connection = psycopg2.connect(user = USERNAME,
+                                    password = PASSWORD,
                                     host = "127.0.0.1",
                                     port = "5432",
                                     database = DBLOCALNAME)
@@ -31,6 +33,7 @@ def db_setup() -> tuple:
 with open(".personal_data", 'r') as f:
     personal_data = json.load(f)
     USERNAME = personal_data["postgres_username"]
+    PASSWORD = personal_data["postgres_password"]
     DBLOCALNAME = personal_data["postgres_database_name"]
     RAWCRASHCSV = "data/{}".format(personal_data["raw_crash_csv"])
 

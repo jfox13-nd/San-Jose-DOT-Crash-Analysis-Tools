@@ -13,11 +13,13 @@ if __name__ == '__main__':
 
     print("Please make sure you have followed all setup instructions properly before this point.\n\nPlease provide your user specific data:")
     username = input("Postgres username:").strip()
+    password = input("Postgres password:").strip()
     db_name = input("Postgres database name:").strip()
     raw_crash = input("CSV with raw crash data:").strip()
 
     personal_data = {
         "postgres_username": username,
+        "postgres_password": password,
         "postgres_database_name": db_name,
         "raw_crash_csv": raw_crash
     }

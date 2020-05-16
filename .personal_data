@@ -1,5 +1,6 @@
 {
     "postgres_username": "",
+    "postgres_password": "",
     "postgres_database_name": "",
     "raw_crash_csv": ""
 }

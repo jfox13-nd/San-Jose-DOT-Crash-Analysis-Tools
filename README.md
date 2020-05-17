@@ -28,8 +28,8 @@ git clone https://github.com/jfox13-nd/San-Jose-DOT-Crash-Locator.git
 ```
 
 ### 3. Add a CSV containing crash data
-Place this csv in the [data/](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/tree/production/data) directory.
-This document will be referred to as raw_crash.csv for the remainder of this document, but it can be named whatever you like as long as you write the proper name in step 4. The file must be in the following format:
+Place this CSV in the [data/](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/tree/production/data) directory.
+This file will be referred to as raw_crash.csv for the remainder of this document, but it can be named whatever you like as long as you write the proper name in step 4. The file must be in the following format:
 ```CSV
 AccidentId,IntersectionId,Vehicle_Dir,Distance,FatalInjuries,MajorInjuries,ModerateInjuries,MinorInjuries,AccidentDateTime
 558201,32889,East Of,211,0,0,0,0,2016-03-13 12:09

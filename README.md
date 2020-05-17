@@ -35,7 +35,14 @@ AccidentId,IntersectionId,Vehicle_Dir,Distance,FatalInjuries,MajorInjuries,Moder
 558201,32889,East Of,211,0,0,0,0,2016-03-13 12:09
 ...
 ```
-Where "AccidentId" is some primary key.
+"AccidentId" is some primary key. "Distance" is in feet. "Vehicle_Dir" must be one of the following strings:
+```
+'At'
+'North Of'
+'South Of'
+'East Of'
+'West Of'
+```
 
 ### 4. Add relevant data to [.personal_data](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/.personal_data)
 You must fill in the information in [.personal_data](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/.personal_data). This can be easily done with the setup script [load_personal.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/load_personal.py). The end result should look as follows:

@@ -56,31 +56,31 @@ Running the bash script [run_all_scripts.sh](https://github.com/jfox13-nd/San-Jo
 This will produce output files containing the GPS coordinates of all crashes.
 
 ##### Required inputs:
-raw_crash.csv
+* raw_crash.csv
 
 ##### Outputs:
-crash_locations.json: for each crash will include actual coordinates, intersection relative location and direction, ksi, injured
-crash_locations.csv: the longitude and lattitude for each crash
-injured.csv: the longitude and lattitude of each injury
-ksi.csv: the longitude and lattitude of each injury
+* crash_locations.json: for each crash will include actual coordinates, intersection relative location and direction, ksi, injured
+* crash_locations.csv: the longitude and lattitude for each crash
+* injured.csv: the longitude and lattitude of each injury
+* ksi.csv: the longitude and lattitude of each injury
 
 #### [analytics.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/analytics.py)
 This will produce multiple files to represent data about crashes on each street segment.
 
 ##### Required inputs:
-raw_crash.csv
+* raw_crash.csv
 
 ##### Outputs:
-street_data.json: for each street segment gives all statistics and crashes
-street_to_crash.csv: csv file for matching street segments to crashes
-street_data.csv: basic stats for each street segment
+* street_data.json: for each street segment gives all statistics and crashes
+* street_to_crash.csv: csv file for matching street segments to crashes
+* street_data.csv: basic stats for each street segment
 
 #### [connected_road_data.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/connected_road_data.py)
 This will create multiple files to represent data about crashes on each road. It must be run after analytics.py.
 
 ##### Required inputs:
-street_data.json ([analytics.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/analytics.py)):
+* street_data.json ([analytics.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/analytics.py)):
 
 ##### Outputs:
-roads.json: for each road will include street segment and intersections within and stats
-roads.csv: for each road will include geometry and stats
+* roads.json: for each road will include street segment and intersections within and stats
+* roads.csv: for each road will include geometry and stats

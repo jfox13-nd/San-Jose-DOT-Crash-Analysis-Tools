@@ -5,7 +5,7 @@ import json
 import sys
 import csv
 PERSONAL_FILE = '.personal_data'
-CSV_FIELDS = 49
+CSV_FIELDS = 9 #49
 
 if __name__ == '__main__':
 

@@ -42,6 +42,7 @@ You must fill in the information in [.personal_data](https://github.com/jfox13-n
 ```JSON
 {
     "postgres_username": "your postgres username",
+    "postgres_password": "your postgres password",
     "postgres_database_name": "your postgres database name",
     "raw_crash_csv": "the name of the CSV from last step"
 }

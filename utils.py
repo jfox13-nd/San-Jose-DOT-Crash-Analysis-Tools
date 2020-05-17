@@ -63,55 +63,6 @@ def clean_severity(n: str) -> int:
         return 0
     return int(n)
 
-def read_crash_csv_orig() -> dict:
-    '''Reads initial crash data csv into a dictionary, parsing out all the relevant information for each crash'''
-    crash_data = dict()
-
-    with open(RAWCRASHCSV) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        line = 0
-        for row in csv_reader:
-            if line == 0:
-                line += 1
-                continue
-            line += 1
-
-            crash_id = row[0]
-            intersection_id = int(row[5])
-            direction = row[8]
-            distance = row[9]
-            fatal = clean_severity(row[44])
-            major = clean_severity(row[45])
-            moderate = clean_severity(row[46])
-            minor = clean_severity(row[47])
-            date = clean_date(row[2])
-
-            if distance and distance == '0':
-                direction = 'At'
-
-            if direction == 'At':
-                distance = '0'
-            elif direction == 'South Of':
-                direction = 'South'
-            elif direction == 'East Of':
-                direction = 'East'
-            elif direction == 'North Of':
-                direction = 'North'
-            elif direction == 'West Of':
-                direction = 'West'
-            else:
-                direction = None
-
-            crash_data[crash_id] = dict()
-            crash_data[crash_id]['intersection_id'] = intersection_id
-            crash_data[crash_id]['direction'] = direction
-            crash_data[crash_id]['distance'] = distance
-            crash_data[crash_id]['ksi'] = calc_KSI(fatal, major)
-            crash_data[crash_id]['injured'] = calc_total_injured(fatal, major, moderate, minor)
-            crash_data[crash_id]['date'] = date
-
-    return crash_data
-
 def read_crash_csv() -> dict:
     '''Reads initial crash data csv into a dictionary, parsing out all the relevant information for each crash'''
     crash_data = dict()

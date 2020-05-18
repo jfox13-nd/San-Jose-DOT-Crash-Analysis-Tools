@@ -42,7 +42,8 @@ AccidentId,IntersectionId,Vehicle_Dir,Distance,FatalInjuries,MajorInjuries,Moder
 ```
 The following format must be maintained:
 * "AccidentId" is some primary key
-* "Distance" is in feet. "Vehicle_Dir" must be one of the following strings:
+* "Distance" is in feet. 
+* "Vehicle_Dir" must be one of the following strings:
 ```
 'At'
 'North Of'

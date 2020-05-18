@@ -24,7 +24,7 @@ OUTPUTINJURED = "data/injured.csv"
 OUTPUTKSI = "data/ksi.csv"  
     
 def add_gps(crash_data: dict, crash: str, cursor: psycopg2.extensions.cursor) -> None:
-    ''' '''
+    ''' Adds the lattitude and longitude of each crash to the crash_data dictionary for a specified crash '''
     if not crash_data[crash]['distance'] or not crash_data[crash]['direction']:
         crash_data[crash]['int_id'] = None
         crash_data[crash]['longitude'] = None

@@ -87,10 +87,14 @@ This will produce output files containing the GPS coordinates of all crashes.
 * raw_crash.csv
 
 ##### Outputs:
-* crash_locations.json: for each crash will include actual coordinates, intersection relative location and direction, ksi, injured
-* crash_locations.csv: the longitude and lattitude for each crash
-* injured.csv: the longitude and lattitude of each injury
-* ksi.csv: the longitude and lattitude of each injury
+* crash_locations.json
+    * Or each crash will include actual coordinates, intersection relative location and direction, ksi, injured
+* crash_locations.csv
+    * The longitude and lattitude for each crash
+* injured.csv
+    * The longitude and lattitude of each injury
+* ksi.csv
+    * The longitude and lattitude of each injury
 
 #### [analytics.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/analytics.py)
 This will produce multiple files to represent data about crashes on each street segment.
@@ -99,9 +103,12 @@ This will produce multiple files to represent data about crashes on each street 
 * raw_crash.csv
 
 ##### Outputs:
-* street_data.json: for each street segment gives all statistics and crashes
-* street_to_crash.csv: csv file for matching street segments to crashes
-* street_data.csv: basic stats for each street segment
+* street_data.json
+    * For each street segment gives all statistics and crashes
+* street_to_crash.csv
+    * CSV file for matching street segments to crashes
+* street_data.csv
+    * Basic stats for each street segment
 
 #### [connected_road_data.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/connected_road_data.py)
 This will create multiple files to represent data about crashes on each road. It must be run after analytics.py.
@@ -110,5 +117,8 @@ This will create multiple files to represent data about crashes on each road. It
 * street_data.json ([analytics.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/analytics.py)):
 
 ##### Outputs:
-* roads.json: for each road will include street segment and intersections within and stats
-* roads.csv: for each road will include geometry and stats
+* roads.json
+    * For each road will include street segment and intersections within and stats
+* roads.csv
+    * For each road will include geometry and stats
+    * The "Geom" column is a Postgres geometry of type MultiLineString

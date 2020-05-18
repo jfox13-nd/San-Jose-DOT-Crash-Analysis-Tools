@@ -91,7 +91,7 @@ if __name__ == '__main__':
             location_found += 1
         else:
             location_found += 1
-    print("crash_location.py:\n\tCrash locations found = {} \n\t Crash locations not found = {}".format(location_found,location_not_found))
+    print("crash_location.py:\n\tCrash locations found = {}\n\t Crash locations not found = {}".format(location_found,location_not_found))
 
     print("crash_location.py: Writing crash locations point outputs")
 
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     with open(OUTPUTCSV,'w') as f:
         writer = csv.writer(f,delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-        writer.writerow(['crash_id','intersection_id','int_num','direction','distance','latitude','longitude'])
+        writer.writerow(['crash_id','intersection_id','int_num','direction','distance','latitude','longitude','date'])
         for crash in crash_data:
             writer.writerow([
                 crash,
@@ -110,7 +110,8 @@ if __name__ == '__main__':
                 crash_data[crash]['direction'],
                 crash_data[crash]['distance'],
                 crash_data[crash]['latitude'],
-                crash_data[crash]['longitude']
+                crash_data[crash]['longitude'],
+                str(crash_data[crash]['date'])
             ])
 
     with open(OUTPUTKSI, 'w') as f_ksi, open(OUTPUTINJURED, 'w') as f_injured :

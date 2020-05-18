@@ -4,8 +4,11 @@
 import json
 import sys
 import csv
+import datetime
+
 PERSONAL_FILE = '.personal_data'
-CSV_FIELDS = 9 #49
+CSV_FIELDS = 9
+CSV_DATE_FIELD = 8
 
 if __name__ == '__main__':
 
@@ -28,22 +31,28 @@ if __name__ == '__main__':
         fp.write(json.dumps(personal_data, default=str, indent=4))
 
     # test database connection
-    from utils import db_setup
+    from utils import db_setup, clean_date
     if not db_setup():
         sys.exit(1)
 
     # test raw_crash_path
     try:
         with open("data/{}".format(raw_crash)) as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
             try:
-                csv_reader = csv.reader(csv_file, delimiter=',')
-                for row in csv_reader:
+                for index, row in enumerate(csv_reader):
                     if len(row) != CSV_FIELDS:
                         print("Error: Provided CSV not properly formatted",file=sys.stdout)
                         sys.exit(1)
+                    try:
+                        if index != 0:
+                            clean_date(row[CSV_DATE_FIELD])
+                    except:
+                        print("Error: Invalid date formatting in CSV",file=sys.stdout)
+                        sys.exit(1)
             except:
                 print("Error: Provided CSV not properly formatted",file=sys.stdout)
-                sys.ext(1)
+                sys.exit(1)
     except:
         print("Error: could not open crash CSV \"{}\"".format(raw_crash), file=sys.stdout)
         sys.exit(1)

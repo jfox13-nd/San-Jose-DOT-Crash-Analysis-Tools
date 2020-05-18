@@ -20,14 +20,19 @@ These tools are for use by San Jose Vision Zero within the San Jose DOT. Given c
 git clone https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools.git
 ```
 
-### 2. Clone and setup the [San-Jose-DOT-Crash-Locator Repo](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Locator)
+### 2. Clone and setup the [San-Jose-DOT-Crash-Locator](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Locator) repository
 Make sure to follow all setup instructions and confirm that your postgres database is running before proceeding.
-You do not clone the [San-Jose-DOT-Crash-Locator Repo](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Locator) into this repository.
+You do not need to clone the [San-Jose-DOT-Crash-Locator Repo](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Locator) into this repository.
 ```bash
 git clone https://github.com/jfox13-nd/San-Jose-DOT-Crash-Locator.git
 ```
 
-### 3. Add a CSV containing crash data
+### 3. Install all relevant Python3 modules
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Add a CSV containing crash data
 Place this CSV in the [data/](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/tree/production/data) directory.
 This file will be referred to as raw_crash.csv for the remainder of this document, but it can be named whatever you like as long as you write the proper name in step 4. The file must be in the following format:
 ```CSV
@@ -52,7 +57,10 @@ The following format must be maintained:
 %Y-%m-%d
 ```
 
-### 4. Add relevant data to [.personal_data](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/.personal_data)
+### Run [run_all_scripts.sh](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/run_all_scripts.sh)
+This will only work on Mac or Linux machines. Windows machines must follows additional steps 5-6.
+
+### 5. Add relevant data to [.personal_data](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/.personal_data)
 You must fill in the information in [.personal_data](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/.personal_data). This can be easily done with the setup script [load_personal.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/load_personal.py). The end result should look as follows:
 ```JSON
 {
@@ -63,9 +71,13 @@ You must fill in the information in [.personal_data](https://github.com/jfox13-n
 }
 ```
 
-### 5. Run relevant scripts
+### 6. Run relevant scripts
 All script outputs will be kept in the [\data](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/tree/production/data) folder. If a script requires files these must be kept in the same folder.
-Running the bash script [run_all_scripts.sh](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/run_all_scripts.sh) will run all scripts in the correct order, including [load_personal.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/load_personal.py).
+To create all outputs run the following python scripts in this order:
+1. [load_personal.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/load_personal.py)
+2. [crash_location.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/crash_location.py)
+3. [analytics.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/analytics.py)
+4. [connected_road_data.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/connected_road_data.py)
 
 #### [crash_location.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/crash_location.py)
 This will produce output files containing the GPS coordinates of all crashes.

@@ -35,13 +35,21 @@ AccidentId,IntersectionId,Vehicle_Dir,Distance,FatalInjuries,MajorInjuries,Moder
 558201,32889,East Of,211,0,0,0,0,2016-03-13 12:09
 ...
 ```
-"AccidentId" is some primary key. "Distance" is in feet. "Vehicle_Dir" must be one of the following strings:
+The following format must be maintained:
+* "AccidentId" is some primary key
+* "Distance" is in feet. "Vehicle_Dir" must be one of the following strings:
 ```
 'At'
 'North Of'
 'South Of'
 'East Of'
 'West Of'
+```
+* "AccidentDateTime" must be in one of the following formats where '-' or '/' can be used as delimeters:
+```
+%Y-%m-%d %H:%M:%S
+%Y-%m-%d %H:%M
+%Y-%m-%d
 ```
 
 ### 4. Add relevant data to [.personal_data](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/.personal_data)

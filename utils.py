@@ -116,10 +116,23 @@ def clean_date(date_str: str) -> datetime.datetime:
     ''' cleans date string into proper datetime '''
     if not date_str:
         return None
-    try:
-        return datetime.datetime.strptime(date_str, '%Y-%m-%d %H:%M')
-    except:
-        return datetime.datetime.strptime(date_str, '%Y-%m-%d')
+
+    if '-' in date_str:
+        try:
+            return datetime.datetime.strptime(date_str, '%Y-%m-%d %H:%M')
+        except:
+            try:
+                return datetime.datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+            except:
+                return datetime.datetime.strptime(date_str, '%Y-%m-%d')
+    else:
+        try:
+            return datetime.datetime.strptime(date_str, '%Y/%m/%d %H:%M')
+        except:
+            try:
+                return datetime.datetime.strptime(date_str, '%Y/%m/%d %H:%M:%S')
+            except:
+                return datetime.datetime.strptime(date_str, '%Y/%m/%d')
 
 def calc_KSI(fatal: int, major: int) -> int:
     ''' KSI calculator '''

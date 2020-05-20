@@ -90,7 +90,7 @@ if __name__ == '__main__':
         if crash_data[crash]['longitude']:
             location_found += 1
         else:
-            location_found += 1
+            location_not_found += 1
     print("crash_location.py:\n\tCrash locations found = {}\n\t Crash locations not found = {}".format(location_found,location_not_found))
 
     print("crash_location.py: Writing crash locations point outputs")

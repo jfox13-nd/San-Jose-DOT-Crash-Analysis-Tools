@@ -42,6 +42,8 @@ AccidentId,IntersectionId,Vehicle_Dir,Distance,FatalInjuries,MajorInjuries,Moder
 ```
 The following format must be maintained:
 * "AccidentId" is some primary key
+* "IntersectionId" is a key used internally by the DOT to refer to intersections uniquely
+    * "IntersectionId" corresponds to the column "intnum" in the "intersections" table
 * "Distance" is in feet. 
 * "Vehicle_Dir" must be one of the following strings:
 ```

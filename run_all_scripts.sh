@@ -12,7 +12,7 @@ run_and_check () {
     fi
 }
 
-for i in "load_personal.py" "crash_location.py" "analytics.py" "connected_road_data.py";
+for i in "load_personal.py" "crash_location.py" "analytics.py" "connected_road_data.py" "upload_roads.py";
     do
         run_and_check $i
     done

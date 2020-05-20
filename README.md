@@ -122,3 +122,9 @@ This will create multiple files to represent data about crashes on each road. It
 * roads.csv
     * For each road will include geometry and stats
     * The "Geom" column is a Postgres geometry of type MultiLineString
+
+#### [upload_roads.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/upload_roads.py)
+This script imports roads.csv into postgres.
+
+##### Required inputs:
+* roads.csv ([connected_road_data.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/connected_road_data.py))

@@ -61,7 +61,7 @@ The following format must be maintained:
 ```
 
 ### Run [run_all_scripts.sh](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/run_all_scripts.sh)
-This will only work on Mac or Linux machines. Windows machines must follows additional steps 5-6.
+Your machine must be able to run Bash scripts to execute this script (if you are using a Mac or Linux machine then you should be able to run this script). If your machine cannot run Bash scripts then you must follow steps 5-6.
 
 ### 5. Add relevant data to [.personal_data](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/.personal_data)
 You must fill in the information in [.personal_data](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/.personal_data). This can be easily done with the setup script [load_personal.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/load_personal.py). The end result should look as follows:

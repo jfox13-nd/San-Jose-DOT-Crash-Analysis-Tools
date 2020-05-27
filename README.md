@@ -91,13 +91,13 @@ This will produce output files containing the GPS coordinates of all crashes.
 
 ##### Outputs:
 * crash_locations.json
-    * Or each crash will include actual coordinates, intersection relative location and direction, ksi, injured
+    * For each crash will include actual coordinates, intersection relative location and direction, KSI, injured
 * crash_locations.csv
-    * The longitude and lattitude for each crash
+    * The longitude and latitude for each crash
 * injured.csv
-    * The longitude and lattitude of each injury
+    * The longitude and latitude of each injury
 * ksi.csv
-    * The longitude and lattitude of each injury
+    * The longitude and latitude of each injury
 
 #### [analytics.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/analytics.py)
 This will produce multiple files to represent data about crashes on each street segment.

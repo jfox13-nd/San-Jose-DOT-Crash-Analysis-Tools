@@ -131,3 +131,33 @@ This script imports roads.csv into postgres.
 
 ##### Required inputs:
 * roads.csv ([connected_road_data.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/connected_road_data.py))
+
+## Modifying This Repository For Other Cities
+This repository could not be immediately used with data from another city, however it could be modified to support another city if that city's crash data is structured in a similar way. This would also neccesitate the modification of the repository [San-Jose-DOT-Crash-Locator](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Locator) which this repository is dependent upon.
+
+The following points must be largely consistent between San Jose and the new city if this repository can be modified to find and analyze crashes in that new city:
+1. The city base map must be structured similarly
+    * The base map of the city must include point intersections and line street segments
+    * Street segment lines start and end at intersections and given a street segment one can quickly retrieve the IDs of these intersections
+    * A street segment is not bisected by any intersections or other street segments.
+        * Street segments only meet at intersections and a street segment only touches intersections at the start or end of a line
+    * There are no overlapping intersections
+2. Certain data must be collected for each collision
+    * Some unique ID for that collision
+    * The intersection closest to the the crash
+        * Preferably there is some intersection ID available for each intersection
+        * If only the names of the intersecting streets are available consider implementing a fuzzy matching algorithim to find the intersection ID
+    * The cardinal direction from the intersection to the collision
+    * The distance between the intersection and the collision
+
+Here are some of the steps required to modify this repository if the previously mentioned points are consistent:
+1. Update the `findcrashlocation()` SQL Funtion from the repository [San-Jose-DOT-Crash-Locator](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Locator).
+    * Information on how to update that function is available at the bottom of its [README.md](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Locator/blob/master/README.md)
+2. Update any SQL in the scripts [crash_location.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/crash_location.py), [analytics.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/analytics.py), and [connected_road_data.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/connected_road_data.py)
+    * Rewrite any SQL code to logically replace any attributes related to San Jose with attributes related to the new city
+3. Update references to KSI and injuries in the scripts [crash_location.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/crash_location.py), [analytics.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/analytics.py), [connected_road_data.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/connected_road_data.py), and [utils.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/utils.py) to reflect whatever measurements your city collects on crashes
+4. Update [utils.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/utils.py) and [load_personal.py](https://github.com/jfox13-nd/San-Jose-DOT-Crash-Analysis-Tools/blob/production/load_personal.py) to reflect any changes you might need to make to the input CSV format (raw_crash.csv).
+
+
+If you are trying to modify this repository for a new city feel free to ask me questions:
+Email: jfox13@nd.edu
